@@ -1,7 +1,7 @@
 class AssignmentTeam < Team
   # Each AssignmentTeam must belong to a specific assignment
   belongs_to :assignment, class_name: 'Assignment', foreign_key: 'parent_id'
-
+  validates :assignment, presence: true
 
   # Copies the current assignment team to a course team
   # - Creates a new CourseTeam with a modified name
@@ -9,7 +9,6 @@ class AssignmentTeam < Team
   def copy_to_course_team(course)
     course_team = CourseTeam.new(
       name: "#{name} (Course)",              # Appends "(Course)" to the team name
-      max_team_size: max_team_size,         # Preserves original max team size
       course: course                         # Associates new team with the given course
     )
     if course_team.save

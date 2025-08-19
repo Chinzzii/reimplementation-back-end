@@ -91,8 +91,7 @@ RSpec.describe MentoredTeam, type: :model do
     )
   end
 
-  let!(:team) { create(:mentored_team, user: user, assignment: assignment) }
-
+  let!(:team) { create(:mentored_team, assignment: assignment) }
 
   describe 'validations' do
     it { should validate_presence_of(:mentor) }

@@ -26,7 +26,6 @@ module Api
       # Creates a new team associated with the current user
       def create
         @team = Team.new(team_params)
-        @team.user = current_user
         if @team.save
           render json: @team, serializer: TeamSerializer, status: :created
         else

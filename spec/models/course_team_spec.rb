@@ -63,8 +63,12 @@ RSpec.describe CourseTeam, type: :model do
     CourseTeam.create!(
       parent_id:      course.id,
       name:           'team 2',
-      user_id:        team_owner.id
     )
+  end
+
+  before do
+    participant = create(:course_participant, user: team_owner, course: course)
+    course_team.add_member(team_owner)
   end
 
 
@@ -101,7 +105,6 @@ RSpec.describe CourseTeam, type: :model do
 
   describe 'associations' do
     it { should belong_to(:course) }
-    it { should belong_to(:user).optional }
     it { should have_many(:teams_participants).dependent(:destroy) }
     it { should have_many(:users).through(:teams_participants) }
   end
