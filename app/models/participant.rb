@@ -5,6 +5,7 @@ class Participant < ApplicationRecord
   belongs_to :team, optional: true
   belongs_to :assignment, class_name: 'Assignment', foreign_key: 'parent_id', optional: true, inverse_of: :participants
   belongs_to :course, class_name: 'Course', foreign_key: 'parent_id', optional: true, inverse_of: :participants
+  belongs_to :duty, optional: true
 
   # Validations
   validates :user_id, presence: true
@@ -15,5 +16,4 @@ class Participant < ApplicationRecord
   def fullname
     user.fullname
   end
-
 end

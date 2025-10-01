@@ -1,9 +1,4 @@
-FactoryBot.define do
-  factory :participant do
-    association :user
-    association :assignment, factory: :assignment
-  end
-  
+FactoryBot.define do  
   factory :assignment_participant, class: 'AssignmentParticipant' do
     association :user
     association :assignment, factory: :assignment
