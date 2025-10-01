@@ -13,6 +13,7 @@ class Assignment < ApplicationRecord
   has_many :sign_up_topics , class_name: 'SignUpTopic', foreign_key: 'assignment_id', dependent: :destroy
   has_many :duties, dependent: :destroy
   has_many :due_dates,as: :parent, class_name: 'DueDate',  dependent: :destroy
+  has_many :duties, dependent: :destroy
   belongs_to :course, optional: true
   belongs_to :instructor, class_name: 'User', inverse_of: :assignments
   has_many :assignments_duties, dependent: :destroy
