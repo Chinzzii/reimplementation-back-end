@@ -5,14 +5,14 @@ class TeamsController < ApplicationController
   # Validate team type only during team creation
   before_action :validate_team_type, only: [:create]
 
-  # GET /api/v1/teams
+  # GET /teams
   # Fetches all teams and renders them using TeamSerializer
   def index
     @teams = Team.all
     render json: @teams, each_serializer: TeamSerializer
   end
 
-  # GET /api/v1/teams/:id
+  # GET /teams/:id
   # Shows a specific team based on ID
   def show
     render json: @team, serializer: TeamSerializer
@@ -20,7 +20,7 @@ class TeamsController < ApplicationController
     render json: { error: 'Team not found' }, status: :not_found
   end
 
-  # POST /api/v1/teams
+  # POST /teams
   # Creates a new team associated with the current user
   def create
     @team = Team.new(team_params)
@@ -31,14 +31,14 @@ class TeamsController < ApplicationController
     end
   end
 
-  # GET /api/v1/teams/:id/members
+  # GET /teams/:id/members
   # Lists all members of a specific team
   def members
     participants = @team.participants.includes(:user)
     render json: participants.map(&:user), each_serializer: UserSerializer
   end
 
-  # POST /api/v1/teams/:id/members
+  # POST /teams/:id/members
   # Adds a new member to the team unless it's already full
   def add_member
     return render json: { errors: ['Team is full'] }, status: :unprocessable_entity if @team.full?
@@ -61,7 +61,7 @@ class TeamsController < ApplicationController
     render json: { error: 'User not found' }, status: :not_found
   end
 
-  # DELETE /api/v1/teams/:id/members/:user_id
+  # DELETE /teams/:id/members/:user_id
   # Removes a member from the team based on user ID
   def remove_member
     user = User.find(params[:user_id])

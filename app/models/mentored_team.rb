@@ -11,7 +11,7 @@ class MentoredTeam < AssignmentTeam
   end
   alias_method :mentor_user, :mentor
 
-  # adds members to the team who are not mentors
+  # Adds members to the team who are not mentors
   def add_member(user)
     participant = assignment.participants.find_by(user_id: user.id)
     return false if participant&.duty&.name&.downcase&.include?('mentor')
@@ -81,7 +81,7 @@ class MentoredTeam < AssignmentTeam
 
   def mentor_must_be_present
     unless mentor_participant.present?
-      errors.add(:base, 'mentor must be present')
+      errors.add(:base, 'a mentor must be present')
     end
   end
 end
