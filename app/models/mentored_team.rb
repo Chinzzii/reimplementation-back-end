@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class MentoredTeam < AssignmentTeam
   # The mentor is determined by a participant on this team having a Duty whose
   # name includes 'mentor' (case-insensitive).
