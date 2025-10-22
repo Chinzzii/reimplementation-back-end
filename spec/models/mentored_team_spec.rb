@@ -91,7 +91,7 @@ RSpec.describe MentoredTeam, type: :model do
 
     it 'can add enrolled user' do
       result = mentored_team.add_member(enrolled_user)
-      expect(result).to be_truthy
+      expect(result[:success]).to be true
       expect(mentored_team.participants.map(&:user_id)).to include(enrolled_user.id)
     end
 
@@ -106,7 +106,8 @@ RSpec.describe MentoredTeam, type: :model do
 
       # Attempting to add a mentor as a normal member should fail
       res = mentored_team.add_member(mentor_user)
-      expect(res).to be_falsey
+      expect(res[:success]).to be false
+      expect(res[:error]).to eq('Mentors cannot be added as regular members.')
       expect(mentored_team.participants.map(&:user_id)).not_to include(mentor_user.id)
     end
 

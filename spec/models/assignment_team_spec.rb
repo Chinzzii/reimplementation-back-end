@@ -70,7 +70,7 @@ RSpec.describe AssignmentTeam, type: :model do
 
   before do
     participant = create(:assignment_participant, user: team_owner, assignment: assignment)
-    assignment_team.add_member(team_owner)
+    assignment_team.add_member(participant)
   end
 
   describe 'validations' do
@@ -88,7 +88,7 @@ RSpec.describe AssignmentTeam, type: :model do
       team = build(:assignment_team)
       team.type = 'WrongType'
       expect(team).not_to be_valid
-      expect(team.errors[:type]).to include("must be 'Assignment' or 'Course' or 'Mentor'")
+      expect(team.errors[:type]).to include("must be 'AssignmentTeam', 'CourseTeam', or 'MentoredTeam'")
     end
   end
 
@@ -107,7 +107,7 @@ RSpec.describe AssignmentTeam, type: :model do
         
         result = assignment_team.add_member(unenrolled_user)
         expect(result[:success]).to be false
-        expect(result[:error]).to eq("#{unenrolled_user.name} is not a participant in this assignment")
+        expect(result[:error]).to eq("#{unenrolled_user.name} is not a participant in this assignment.")
       end
     end
   end
@@ -130,7 +130,7 @@ RSpec.describe AssignmentTeam, type: :model do
       result = assignment_team.add_member(unenrolled_user)
 
       expect(result[:success]).to be false
-      expect(result[:error]).to eq("#{unenrolled_user.name} is not a participant in this assignment")
+      expect(result[:error]).to eq("#{unenrolled_user.name} is not a participant in this assignment.")
     end
   end
 end 

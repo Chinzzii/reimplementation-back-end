@@ -13,9 +13,7 @@ module TeamOperationsHelper
 
   # Copies all members from the source team to the target team
   def self.copy_team_members(source_team, target_team)
-    source_team.users.each do |user|
-      target_team.add_member(user)
-    end
+    source_team.copy_members_to(target_team)
   end
 
   # Returns a hash of basic statistics about the given team

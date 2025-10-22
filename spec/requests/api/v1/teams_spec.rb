@@ -206,6 +206,31 @@ RSpec.describe TeamsController, type: :request do
         expect(response).to have_http_status(:unprocessable_entity)
         expect(json_response).to have_key('errors')
       end
+
+      it 'returns error when user is not enrolled in the team context' do
+        unenrolled_user = create(:user)
+        params = {
+          team_participant: {
+            user_id: unenrolled_user.id
+          }
+        }
+        post "/teams/#{team_with_course.id}/members", params:, headers: auth_headers
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(json_response['errors']).to include("#{unenrolled_user.name} is not a participant in this course.")
+      end
+
+      it 'returns not found when user id does not exist' do
+        params = {
+          team_participant: {
+            user_id: 0
+          }
+        }
+        post "/teams/#{team_with_course.id}/members", params:, headers: auth_headers
+
+        expect(response).to have_http_status(:not_found)
+        expect(json_response['errors']).to include('User not found')
+      end
     end
 
     describe 'DELETE /teams/:id/members/:user_id' do
@@ -227,6 +252,8 @@ RSpec.describe TeamsController, type: :request do
   private
 
   def json_response
+    return {} if response.body.blank?
+
     JSON.parse(response.body)
   end
 end

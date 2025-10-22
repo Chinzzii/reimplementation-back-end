@@ -14,12 +14,23 @@ class MentoredTeam < AssignmentTeam
   alias_method :mentor_user, :mentor
 
   # Adds members to the team who are not mentors
-  def add_member(participant)
+  def add_member(member)
+    participant =
+      case member
+      when Participant
+        member
+      when User
+        assignment&.participants&.find_by(user_id: member.id, parent_id: assignment&.id)
+      else
+        nil
+      end
+    return super(member) unless participant
+
     # Fail fast if the participant's duty is 'mentor'.
-    if participant.duty&.name&.downcase&.include?('mentor')
+    if mentor_designation?(participant)
       return { success: false, error: 'Mentors cannot be added as regular members.' }
     end
-
+    
     # If not a mentor, proceed with the standard add_member logic.
     super(participant)
   end
@@ -83,5 +94,9 @@ class MentoredTeam < AssignmentTeam
     unless mentor_participant.present?
       errors.add(:base, 'a mentor must be present')
     end
+  end
+
+  def mentor_designation?(participant)
+    participant.duty&.name&.downcase&.include?('mentor')
   end
 end

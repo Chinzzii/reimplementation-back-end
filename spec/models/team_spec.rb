@@ -111,7 +111,7 @@ RSpec.describe Team, type: :model do
       # An unsupported value for type should trigger an inclusion error.
       team = Team.new(parent_id: assignment.id, type: 'Team')
       expect(team).not_to be_valid
-      expect(team.errors[:type]).to include("must be 'Assignment' or 'Course' or 'Mentor'")
+      expect(team.errors[:type]).to include("must be 'AssignmentTeam', 'CourseTeam', or 'MentoredTeam'")
     end
 
     it 'is valid as AssignmentTeam' do
@@ -279,7 +279,7 @@ RSpec.describe Team, type: :model do
         extra_part = AssignmentParticipant.create!(parent_id: assignment.id, user: extra_user, handle: extra_user.name)
         result     = assignment_team.add_member(extra_part)
 
-        expect(result[:error]).to include("team is at full capacity")
+        expect(result[:error]).to eq("Team is at full capacity.")
       end
     end
 
@@ -308,6 +308,72 @@ RSpec.describe Team, type: :model do
         # CourseTeam.full? is false, so add_member should succeed
         expect(result[:success]).to be true
       end
+    end
+  end
+
+  describe '#remove_member' do
+    it 'removes an existing participant from the team' do
+      user        = create_student("remover")
+      participant = AssignmentParticipant.create!(parent_id: assignment.id, user: user, handle: user.name)
+      assignment_team.add_member(participant)
+
+      expect {
+        assignment_team.remove_member(participant)
+      }.to change { TeamsParticipant.where(team_id: assignment_team.id).count }.by(-1)
+    end
+
+    it 'returns an error when participant is not on the team' do
+      user        = create_student("ghost")
+      participant = AssignmentParticipant.create!(parent_id: assignment.id, user: user, handle: user.name)
+
+      result = assignment_team.remove_member(participant)
+      expect(result[:success]).to be false
+      expect(result[:error]).to eq('Participant is not on this team.')
+    end
+  end
+
+  describe '#size and #empty?' do
+    it 'reflects participant count accurately' do
+      expect(assignment_team.size).to eq(0)
+      expect(assignment_team.empty?).to be true
+
+      user        = create_student("metric")
+      participant = AssignmentParticipant.create!(parent_id: assignment.id, user: user, handle: user.name)
+      assignment_team.add_member(participant)
+
+      assignment_team.reload
+      expect(assignment_team.size).to eq(1)
+      expect(assignment_team.empty?).to be false
+    end
+  end
+
+  describe '#copy_to' do
+    it 'copies an assignment team to a course team and creates course participants' do
+      user        = create_student("copy_course")
+      participant = AssignmentParticipant.create!(parent_id: assignment.id, user: user, handle: user.name)
+      assignment_team.add_member(participant)
+
+      new_course = Course.create!(name: "Target Course", instructor_id: instructor.id, institution_id: institution.id, directory_path: "/target")
+      copied_team = assignment_team.copy_to_course(new_course)
+
+      expect(copied_team).to be_a(CourseTeam)
+      expect(copied_team.participants.count).to eq(1)
+      expect(copied_team.participants.first).to be_a(CourseParticipant)
+      expect(new_course.teams).to include(copied_team)
+    end
+
+    it 'copies a course team to an assignment team and creates assignment participants' do
+      user        = create_student("copy_assignment")
+      participant = CourseParticipant.create!(parent_id: course.id, user: user, handle: user.name)
+      course_team.add_member(participant)
+
+      target_assignment = Assignment.create!(name: "Target Assignment", instructor_id: instructor.id, max_team_size: 4)
+      copied_team = course_team.copy_to_assignment(target_assignment)
+
+      expect(copied_team).to be_a(AssignmentTeam)
+      expect(copied_team.participants.count).to eq(1)
+      expect(copied_team.participants.first).to be_a(AssignmentParticipant)
+      expect(target_assignment.teams).to include(copied_team)
     end
   end
 end
